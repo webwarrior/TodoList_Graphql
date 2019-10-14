@@ -1,30 +1,56 @@
 import React from "react";
-import { 
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Query, Mutation } from 'react-apollo'; 
+import gql from 'graphql-tag';
+import styles from './styles'
 
-const TodoList = ({todos, toggleTodo}) => (
-    
-
-    <View style={{ padding: 20 }}>
-        {todos.map(todo =>
-            <TouchableOpacity key={todo.id} onPress={()=>toggleTodo(todo.id)}>
-                <Text style={{fontSize:24,
-                    textDecorationLine: todo.completed ? 'line-through':'none'
-                    }}>{todo.text}</Text>
-            </TouchableOpacity>
-        )} 
-    </View>
-    )
-export default TodoList;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
+const todos = gql`
+    query {
+        tasks {
+            id
+            task
+            completed 
+        }
     }
-});
+`;
+
+const TodoList = () => {
+    return (
+        <Query query={todos}>
+            {
+                ({data, error, loading}) => {
+                    if (error) {
+                        console.error(error);
+                        return <Text>Error occurred</Text>;
+                    }
+                    if (loading) {
+                        return <Text>Loading</Text>;
+                    }
+                    if (data) {
+                        const toggleTodo = () => {
+                            //mutate();                       
+                        }
+                        return (
+                            <ScrollView style={styles.ScrollView}>
+                                {
+                                    data.tasks.map(todo => {
+                                        return (
+                                            <TouchableOpacity key={todo.id} onPress={()=>toggleTodo(todo.id)} style={styles.taskItem}>
+                                                <Text style={{width: 380, 
+                                                    textAlign: 'left', 
+                                                    textDecorationLine: todo.completed ? 'line-through':'none'
+                                                    }}>{todo.task}</Text>
+                                            </TouchableOpacity>
+                                        )
+                                    })
+                                }
+                            </ScrollView>    
+                        )   
+                    }
+                }
+            }
+        </Query>
+    )
+}
+
+export default TodoList;
