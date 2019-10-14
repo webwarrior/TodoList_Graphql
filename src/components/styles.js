@@ -63,7 +63,11 @@ export default StyleSheet.create({
         flex: 1, 
         padding: 5,
         borderTopLeftRadius: 5, 
-        borderBottomLeftRadius: 5
+        borderBottomLeftRadius: 5,
+        paddingTop: 2,
+        paddingBottom: 2,
+        fontSize: 18,
+        width: 400
     },
     headerBackground: {
         paddingBottom: 40,
@@ -84,4 +88,9 @@ export default StyleSheet.create({
         textAlign: 'center',
         color: Colors.black,
     },
+    taskContainer: {
+        flexDirection:'row', 
+        marginHorizontal: 20,
+        width: 300
+      },
 });    

@@ -1,14 +1,10 @@
 import React, {useState} from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { Query } from 'react-apollo'; 
+import { Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { Query, Mutation } from 'react-apollo'; 
 import gql from 'graphql-tag';
-import styles from './components/styles'
+import styles from './components/styles.js'
 
-export default function Main() {
-    state = {
-        text: ''
-    }
-    
+export default function Main() {   
     return (
     <View style={styles.container}>
         <Text>Main App</Text>
@@ -18,23 +14,62 @@ export default function Main() {
   );
 }
 
+const insertTodo = gql`
+    mutation ($task: String) {
+        insert_tasks(
+            objects: {task: $task, userId: 1}
+        ) 
+        { returning {id, task}}
+    }
+`
+
 const TextBox = () => {
     const [text, setText] = useState('');
     const handleTextChange = (text) => setText(text);
     return (
         <View style={{flexDirection:'row', marginHorizontal: 20}}>
-            <TextInput 
-            /*onChangeText={(text) => this.setState({text})} */
-            onChangeText={handleTextChange}
-            value={text} placeholder="Add task desc"
-            style={styles.taskText}>
-            </TextInput>
-            <TouchableOpacity onPress={()=>this.addTodo(text)}>
-                <View style={{height:50, backgroundColor:'lightgrey', alignItems: 'center', 
-                justifyContent: 'center'}}>
-                    <Text style={{color: 'green', padding: 10, fontSize: 30 }}>+</Text>
-                </View>
-            </TouchableOpacity>
+            <Mutation 
+            mutation={insertTodo} 
+            variables={{task: text}}
+            update={(cache, { data: { insert_tasks } } ) => {
+                const excistingTasks = cache.readQuery({
+                    query: userTasks
+                }).tasks;
+                const newTasks = [insert_tasks.returning[0], ...excistingTasks];
+                cache.writeQuery({
+                    query: userTasks,
+                    data: { tasks: newTasks}
+                });
+            }}
+            onCompleted={() => setText('')}
+            >
+                {
+                    mutate => {
+                        const addTask = () => {
+                            mutate();                         
+                        }
+                        return  (
+                            <View style={styles.taskContainer}>
+                                <TextInput 
+                                    /*onChangeText={(text) => this.setState({text})} */
+                                    onChangeText={handleTextChange}
+                                    value={text} 
+                                    placeholder="Add task desc"
+                                    style={styles.taskText}
+                                    onSubmitEditing={addTask}/>
+                                <TouchableOpacity onPress={addTask}>
+                                    <View style={{height:50, backgroundColor:'lightgrey', alignItems: 'center', 
+                                    justifyContent: 'center', borderColor: 'grey', borderWidth:1, 
+                                    borderTopRightRadius: 5, borderBottomRightRadius: 5,}}>
+                                        <Text style={{color: 'green', padding: 10, fontSize: 30 }}>+</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        );
+                    }
+                }
+            </Mutation>
+            
         </View>
     );
 }
