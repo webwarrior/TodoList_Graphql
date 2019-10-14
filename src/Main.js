@@ -3,11 +3,12 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-nativ
 import { Query, Mutation } from 'react-apollo'; 
 import gql from 'graphql-tag';
 import styles from './components/styles.js'
+import Header from './components/Header'
 
 export default function Main() {   
     return (
     <View style={styles.container}>
-        <Text>Main App</Text>
+        <Header/>
         <TextBox/>
         <List/>
     </View>
